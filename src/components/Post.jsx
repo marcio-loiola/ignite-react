@@ -1,11 +1,16 @@
 import { format, formatDistanceToNow } from "date-fns";
 import ptBR from "date-fns/locale/pt-BR";
+import { useState } from "react";
 
 import { Avatar } from "./Avatar";
 import { Comment } from "./Comment";
 import styles from "./Post.module.css";
 
 export function Post({ author, publishedAt, content }) {
+  const [comments, setComments] = useState(["Post muito bacana!"]);
+
+  const [newCommentText, setNewCommentText] = useState("");
+
   const publishedDateFormatted = format(
     publishedAt,
     "d 'de' LLLL 'às' HH:mm'h'" /* Escapando strings envolvendo em aspas simples as que estavam em aspas duplas */,
@@ -23,6 +28,19 @@ export function Post({ author, publishedAt, content }) {
     hour: "2-digit",
     minute: "2-digit",
   }).format(publishedAt); */
+
+  /*  Forma padrão do JavaScript moderno lidar com datas, pouco produtiva e muito verbosa mas robusta */
+
+  function handleCreateNewComment() {
+    event.preventDefault();
+
+    setComments([...comments, newCommentText]);
+    setNewCommentText("");
+  }
+
+  const handleCommentChange = () => {
+    setNewCommentText(event.target.value);
+  };
 
   return (
     <article className={styles.post}>
@@ -58,18 +76,23 @@ export function Post({ author, publishedAt, content }) {
         })}
       </div>
 
-      <form className={styles.commentForm}>
+      <form onSubmit={handleCreateNewComment} className={styles.commentForm}>
         <strong> Deixe seu feedback </strong>
-        <textarea placeholder="Deixe um comentário" />
+        <textarea
+          name="comment"
+          placeholder="Deixe um comentário"
+          value={newCommentText}
+          onChange={handleCommentChange}
+        />
         <footer>
-          <button type="submit"> Publicar </button>
+          <button type="submit">Publicar</button>
         </footer>
       </form>
 
       <div className={styles.commentList}>
-        <Comment />
-        <Comment />
-        <Comment />
+        {comments.map((comment) => {
+          return <Comment content={comment} />;
+        })}
       </div>
     </article>
   );
